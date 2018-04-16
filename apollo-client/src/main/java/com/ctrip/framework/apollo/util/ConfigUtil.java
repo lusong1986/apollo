@@ -204,8 +204,8 @@ public class ConfigUtil {
   }
 
   public String getDefaultLocalCacheDir() {
-    String cacheRoot = isOSWindows() ? "C:\\opt\\data\\%s" : "/opt/data/%s";
-    return String.format(cacheRoot, getAppId());
+		String cacheRoot = isOSWindows() ? "C:\\opt\\data\\%s" : "/opt/data/%s";
+		return String.format(cacheRoot, getAppId()) + (isOSWindows() ? "\\" : "/") + getApolloEnv().toString();
   }
 
   public boolean isInLocalMode() {

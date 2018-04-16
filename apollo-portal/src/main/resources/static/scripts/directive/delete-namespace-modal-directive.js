@@ -36,24 +36,34 @@ function deleteNamespaceModalDirective($window, $q, toastr, AppUtil, EventManage
                         return;
                     }
 
-                    if (toDeleteNamespace.isLinkedNamespace) {
+                    if(toDeleteNamespace.isPublic){
+	                    if (toDeleteNamespace.isLinkedNamespace) {
+	                        showDeleteNamespaceConfirmDialog();
+	                    } else {
+	                        //5. check public namespace has not associated namespace
+	                        checkPublicNamespace(toDeleteNamespace).then(function () {
+	                            showDeleteNamespaceConfirmDialog();
+	                        });
+	                    }
+                    }else{
                         showDeleteNamespaceConfirmDialog();
-                    } else {
-                        //5. check public namespace has not associated namespace
-                        checkPublicNamespace(toDeleteNamespace).then(function () {
-                            showDeleteNamespaceConfirmDialog();
-                        });
                     }
+                    
                 })
 
             });
 
             function checkNotPrivateNamespace(namespace) {
-                if (!namespace.isPublic) {
-                    toastr.error("不能删除私有的Namespace", "删除失败");
+//                if (!namespace.isPublic) {
+//                    toastr.error("不能删除私有的Namespace", "删除失败");
+//                    return false;
+//                }
+            	
+                if (namespace.viewName=='application') {
+                    toastr.error("不能删除默认的Namespace", "删除失败");
                     return false;
-                }
-
+                }            	
+            	
                 return true;
             }
 

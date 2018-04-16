@@ -1,23 +1,22 @@
 package com.ctrip.framework.apollo.core.utils;
 
-import java.net.URL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileNotFoundException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(ResourceUtils.class);
   private static final String[] DEFAULT_FILE_SEARCH_LOCATIONS = new String[]{"./config/", "./"};
 
-  @SuppressWarnings("unchecked")
   public static Properties readConfigFile(String configPath, Properties defaults) {
     Properties props = new Properties();
     if (defaults != null) {

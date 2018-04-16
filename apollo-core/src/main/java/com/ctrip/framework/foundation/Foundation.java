@@ -1,13 +1,14 @@
 package com.ctrip.framework.foundation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ctrip.framework.foundation.internals.NullProviderManager;
 import com.ctrip.framework.foundation.internals.ServiceBootstrap;
 import com.ctrip.framework.foundation.spi.ProviderManager;
 import com.ctrip.framework.foundation.spi.provider.ApplicationProvider;
 import com.ctrip.framework.foundation.spi.provider.NetworkProvider;
 import com.ctrip.framework.foundation.spi.provider.ServerProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class Foundation {
   private static final Logger logger = LoggerFactory.getLogger(Foundation.class);

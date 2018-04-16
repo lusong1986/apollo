@@ -76,8 +76,19 @@ public class NamespaceController {
   @RequestMapping(value = "/apps/{appId}/envs/{env}/clusters/{clusterName}/namespaces/{namespaceName:.+}", method = RequestMethod.GET)
   public NamespaceBO findNamespace(@PathVariable String appId, @PathVariable String env,
                                    @PathVariable String clusterName, @PathVariable String namespaceName) {
-
     return namespaceService.loadNamespaceBO(appId, Env.valueOf(env), clusterName, namespaceName);
+  }
+  
+  @RequestMapping(value = "/apps/{appId}/envs/{env}/clusters/{clusterName}/namespaceid/{namespaceName:.+}", method = RequestMethod.GET)
+  public long findNamespaceId(@PathVariable String appId, @PathVariable String env,
+                                   @PathVariable String clusterName, @PathVariable String namespaceName) {
+		NamespaceBO loadNamespaceBO = namespaceService.loadNamespaceBO(appId, Env.valueOf(env), clusterName,
+				namespaceName);
+		if (loadNamespaceBO != null && loadNamespaceBO.getBaseInfo() != null) {
+			return loadNamespaceBO.getBaseInfo().getId();
+		}
+    
+	return -1;
   }
 
   @RequestMapping(value = "/envs/{env}/apps/{appId}/clusters/{clusterName}/namespaces/{namespaceName}/associated-public-namespace",
@@ -167,13 +178,12 @@ public class NamespaceController {
   }
 
   @RequestMapping(value = "/envs/{env}/appnamespaces/{publicNamespaceName}/namespaces", method = RequestMethod.GET)
-  public List<NamespaceDTO> getPublicAppNamespaceAllNamespaces(@PathVariable String env,
+  public List<NamespaceDTO> getAppNamespaceAllNamespaces(@PathVariable String env,
                                                                @PathVariable String publicNamespaceName,
                                                                @RequestParam(name = "page", defaultValue = "0") int page,
                                                                @RequestParam(name = "size", defaultValue = "10") int size) {
 
-    return namespaceService.getPublicAppNamespaceAllNamespaces(Env.fromString(env), publicNamespaceName, page, size);
-
+    return namespaceService.getAppNamespaceAllNamespaces(Env.fromString(env), publicNamespaceName, page, size);
   }
 
   private void assignNamespaceRoleToOperator(String appId, String namespaceName) {

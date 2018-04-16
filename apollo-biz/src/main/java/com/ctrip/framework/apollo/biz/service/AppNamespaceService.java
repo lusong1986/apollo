@@ -45,6 +45,11 @@ public class AppNamespaceService {
     Preconditions.checkArgument(namespaceName != null, "Namespace must not be null");
     return appNamespaceRepository.findByNameAndIsPublicTrue(namespaceName);
   }
+  
+	public List<AppNamespace> findPrivateNamespaceByName(String namespaceName) {
+		Preconditions.checkArgument(namespaceName != null, "Namespace must not be null");
+		return appNamespaceRepository.findByNameAndIsPublicFalse(namespaceName);
+	}
 
   public List<AppNamespace> findByAppId(String appId) {
     return appNamespaceRepository.findByAppId(appId);
@@ -67,6 +72,10 @@ public class AppNamespaceService {
         .checkArgument(!StringUtils.isContainEmpty(appId, namespaceName), "appId or Namespace must not be null");
     return appNamespaceRepository.findByAppIdAndName(appId, namespaceName);
   }
+  
+	public void deleteById(Long id) {
+		appNamespaceRepository.delete(id);
+	}
 
   public List<AppNamespace> findByAppIdAndNamespaces(String appId, Set<String> namespaceNames) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(appId), "appId must not be null");

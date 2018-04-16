@@ -1,14 +1,7 @@
 package com.ctrip.framework.apollo.adminservice.controller;
 
-import com.ctrip.framework.apollo.biz.service.AdminService;
-import com.ctrip.framework.apollo.biz.service.AppService;
-import com.ctrip.framework.apollo.common.dto.AppDTO;
-import com.ctrip.framework.apollo.common.entity.App;
-import com.ctrip.framework.apollo.common.exception.BadRequestException;
-import com.ctrip.framework.apollo.common.exception.NotFoundException;
-import com.ctrip.framework.apollo.common.utils.BeanUtils;
-import com.ctrip.framework.apollo.common.utils.InputValidator;
-import com.ctrip.framework.apollo.core.utils.StringUtils;
+import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +12,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Objects;
+import com.ctrip.framework.apollo.biz.service.AdminService;
+import com.ctrip.framework.apollo.biz.service.AppService;
+import com.ctrip.framework.apollo.common.dto.AppDTO;
+import com.ctrip.framework.apollo.common.entity.App;
+import com.ctrip.framework.apollo.common.exception.BadRequestException;
+import com.ctrip.framework.apollo.common.exception.NotFoundException;
+import com.ctrip.framework.apollo.common.utils.BeanUtils;
+import com.ctrip.framework.apollo.common.utils.InputValidator;
+import com.ctrip.framework.apollo.core.utils.StringUtils;
 
 @RestController
 public class AppController {
@@ -48,8 +48,8 @@ public class AppController {
     return dto;
   }
 
-  @RequestMapping(value = "/apps/{appId:.+}", method = RequestMethod.DELETE)
-  public void delete(@PathVariable("appId") String appId, @RequestParam String operator) {
+  @RequestMapping(value = "/apps/{appId}/op/{operator}", method = RequestMethod.DELETE)
+  public void delete(@PathVariable("appId") String appId, @PathVariable("operator") String operator) {
     App entity = appService.findOne(appId);
     if (entity == null) {
       throw new NotFoundException("app not found for appId " + appId);

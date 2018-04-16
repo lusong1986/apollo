@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.ctrip.framework.apollo</groupId>
         <artifactId>apollo</artifactId>
-        <version>0.9.1-SNAPSHOT</version>
+        <version>0.9.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -71,5 +71,9 @@
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
+		<dependency>
+			<groupId>com.dianping.cat</groupId>
+			<artifactId>cat-client</artifactId>
+		</dependency>
     </dependencies>
 </project>

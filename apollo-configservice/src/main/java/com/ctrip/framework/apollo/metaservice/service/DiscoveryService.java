@@ -1,16 +1,16 @@
 package com.ctrip.framework.apollo.metaservice.service;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.ctrip.framework.apollo.core.ServiceNameConsts;
 import com.ctrip.framework.apollo.tracer.Tracer;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class DiscoveryService {

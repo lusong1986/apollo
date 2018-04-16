@@ -1,8 +1,5 @@
 package com.ctrip.framework.apollo.common.entity;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.MoreObjects.ToStringHelper;
-
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -14,6 +11,9 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
+
+import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
 
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -104,7 +104,7 @@ public abstract class BaseEntity {
   }
 
   protected ToStringHelper toStringHelper() {
-    return MoreObjects.toStringHelper(this).omitNullValues().add("id", id)
+    return Objects.toStringHelper(this).omitNullValues().add("id", id)
         .add("dataChangeCreatedBy", dataChangeCreatedBy)
         .add("dataChangeCreatedTime", dataChangeCreatedTime)
         .add("dataChangeLastModifiedBy", dataChangeLastModifiedBy)

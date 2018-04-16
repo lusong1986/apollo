@@ -1,13 +1,28 @@
 package com.ctrip.framework.apollo.portal.service;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ctrip.framework.apollo.common.dto.AppDTO;
+import com.ctrip.framework.apollo.common.dto.ClusterDTO;
+import com.ctrip.framework.apollo.common.dto.NamespaceDTO;
 import com.ctrip.framework.apollo.common.entity.App;
+import com.ctrip.framework.apollo.common.entity.AppNamespace;
 import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import com.ctrip.framework.apollo.common.utils.BeanUtils;
 import com.ctrip.framework.apollo.core.enums.Env;
 import com.ctrip.framework.apollo.portal.api.AdminServiceAPI;
+import com.ctrip.framework.apollo.portal.component.PortalSettings;
+import com.ctrip.framework.apollo.portal.constant.PermissionType;
 import com.ctrip.framework.apollo.portal.constant.TracerEventType;
 import com.ctrip.framework.apollo.portal.entity.bo.UserInfo;
 import com.ctrip.framework.apollo.portal.entity.vo.EnvClusterInfo;
@@ -15,15 +30,7 @@ import com.ctrip.framework.apollo.portal.repository.AppRepository;
 import com.ctrip.framework.apollo.portal.spi.UserInfoHolder;
 import com.ctrip.framework.apollo.portal.spi.UserService;
 import com.ctrip.framework.apollo.tracer.Tracer;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.Lists;
 
 @Service
 public class AppService {
@@ -32,6 +39,10 @@ public class AppService {
   private UserInfoHolder userInfoHolder;
   @Autowired
   private AdminServiceAPI.AppAPI appAPI;
+  @Autowired
+  private AdminServiceAPI.NamespaceAPI namespaceAPI;
+  @Autowired
+  private AdminServiceAPI.ClusterAPI clusterAPI;
   @Autowired
   private AppRepository appRepository;
   @Autowired
@@ -42,15 +53,48 @@ public class AppService {
   private RoleInitializationService roleInitializationService;
   @Autowired
   private UserService userService;
+  @Autowired
+  private RolePermissionService rolePermissionService;
+  @Autowired
+  private PortalSettings portalSettings;
+  
+	private boolean isSuperAdmin() {
+		return rolePermissionService.isSuperAdmin(userInfoHolder.getUser().getUserId());
+	}
 
+	private boolean isOwner(String ownerName) {
+		return ownerName.equalsIgnoreCase(userInfoHolder.getUser().getUserId());
+	}
 
-  public List<App> findAll() {
-    Iterable<App> apps = appRepository.findAll();
-    if (apps == null) {
-      return Collections.emptyList();
-    }
-    return Lists.newArrayList((apps));
-  }
+	private boolean hasAssignRolePermission(String appId) {
+		return rolePermissionService.userHasPermission(userInfoHolder.getUser().getUserId(),
+				PermissionType.ASSIGN_ROLE, appId);
+	}
+
+	public List<App> findAll() {
+		Iterable<App> apps = appRepository.findAll();
+		if (apps == null) {
+			return Collections.emptyList();
+		}
+		return Lists.newArrayList((apps));
+	}
+
+	public List<App> findAllByUserId() {
+		Iterable<App> apps = appRepository.findAll();
+		if (apps == null) {
+			return Collections.emptyList();
+		}
+
+		ArrayList<App> newList = Lists.newArrayList();
+		for (App app : apps) {
+			String ownerName = app.getOwnerName();
+			if (isOwner(ownerName) || isSuperAdmin() || hasAssignRolePermission(app.getAppId())) {
+				newList.add(app);
+			}
+		}
+
+		return newList;
+	}
 
   public List<App> findByAppIds(Set<String> appIds) {
     return appRepository.findByAppIdIn(appIds);
@@ -76,6 +120,81 @@ public class AppService {
     AppDTO appDTO = BeanUtils.transfrom(AppDTO.class, app);
     appAPI.createApp(env, appDTO);
   }
+  
+  @Transactional
+	public void deleteApp(App app) {
+		final String appId = app.getAppId();
+		final String operator = userInfoHolder.getUser().getUserId();
+		List<AppNamespace> appNamespaces = appNamespaceService.findByAppId(appId);
+		final List<Env> allEnvs = portalSettings.getAllEnvs();
+		for (Env envEnum : allEnvs) {
+			for (AppNamespace appNamespace : appNamespaces) {
+				if (appNamespace.isPublic()) {
+					int count = 0;
+					try {
+						count = namespaceAPI.countPublicAppNamespaceAssociatedNamespaces(envEnum,
+								appNamespace.getName());
+					} catch (Exception e) {
+					}
+
+					if (count > 0) {
+						throw new BadRequestException(
+								String.format(
+										"Can not delete this app because the namespace have associated namespace. namespace = %s",
+										appNamespace.getName()));
+					}
+				}
+			}
+		}
+
+		Map<Env, List<ClusterDTO>> envClusterMap = new HashMap<Env, List<ClusterDTO>>();
+		for (Env envEnum : allEnvs) {
+			List<ClusterDTO> clusters = clusterAPI.findClustersByApp(appId, envEnum);
+			envClusterMap.put(envEnum, clusters);
+		}
+
+		for (AppNamespace appNamespace : appNamespaces) {
+			// 删除portal的appnamespace
+			appNamespaceService.deleteById(appNamespace.getId());
+			for (Env envEnum : allEnvs) {
+				try {
+					// 删除config库appnamespace中的数据
+					namespaceAPI.deleteAppNamespace(envEnum, appId, appNamespace.getName(), operator);
+				} catch (Exception e) {
+				}
+			}
+		}
+
+		for (Env envEnum : allEnvs) {
+			List<ClusterDTO> clusters = envClusterMap.get(envEnum);
+			for (ClusterDTO clusterDTO : clusters) {
+				List<NamespaceDTO> namespaces = namespaceAPI.findNamespaceByCluster(appId, envEnum,
+						clusterDTO.getName());
+				for (NamespaceDTO namespaceDTO : namespaces) {
+					try {
+						// 删除config库中对应的所有namespace
+						namespaceAPI.deleteNamespace(envEnum, appId, clusterDTO.getName(),
+								namespaceDTO.getNamespaceName(), operator);
+					} catch (Exception e) {
+					}
+				}
+			}
+		}
+
+		// 删除portal中对应的app
+		appRepository.delete(app.getId());
+
+		for (Env envEnum : allEnvs) {
+			List<ClusterDTO> clusters = envClusterMap.get(envEnum);
+			for (ClusterDTO clusterDTO : clusters) {
+				// 删除config库中的cluster信息
+				clusterAPI.delete(envEnum, appId, clusterDTO.getName(), operator);
+			}
+
+			// 删除config库中app
+			appAPI.deleteApp(envEnum, appId, operator);
+		}
+	}
 
   @Transactional
   public App createAppInLocal(App app) {

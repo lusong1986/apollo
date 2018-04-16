@@ -1,11 +1,11 @@
 package com.ctrip.framework.apollo.core;
 
-import com.ctrip.framework.apollo.core.enums.Env;
-import com.ctrip.framework.apollo.core.utils.ResourceUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import com.ctrip.framework.apollo.core.enums.Env;
+import com.ctrip.framework.apollo.core.utils.ResourceUtils;
 
 /**
  * The meta domain will load the meta server from System environment first, if not exist, will load

@@ -115,6 +115,21 @@ public class ItemController {
     }
     return items;
   }
+  
+  @RequestMapping(value = "/apps/{appId}/envs/{env}/clusters/{clusterName}/namespaces/{namespaceName}/itemid/{key:.+}", method = RequestMethod.GET)
+  public long findItemId(@PathVariable String appId, @PathVariable String env,
+                                 @PathVariable String clusterName, @PathVariable String namespaceName, @PathVariable String key ) {
+		List<ItemDTO> items = configService.findItems(appId, Env.valueOf(env), clusterName, namespaceName);
+		if (items != null && items.size() > 0) {
+			for (ItemDTO itemDTO : items) {
+				if (itemDTO.getKey().equals(key)) {
+					return itemDTO.getId();
+				}
+			}
+		}
+		return -1;
+  }
+  
 
   @RequestMapping(value = "/apps/{appId}/envs/{env}/clusters/{clusterName}/namespaces/{namespaceName}/branches/{branchName}/items", method = RequestMethod.GET)
   public List<ItemDTO> findBranchItems(@PathVariable("appId") String appId, @PathVariable String env,

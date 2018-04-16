@@ -1,13 +1,13 @@
 package com.ctrip.framework.apollo.common.utils;
 
-import com.google.common.base.MoreObjects;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Map;
 
 import org.springframework.web.client.HttpStatusCodeException;
 
-import java.lang.reflect.Type;
-import java.util.Map;
+import com.google.common.base.Objects;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public final class ExceptionUtils {
 
@@ -18,7 +18,7 @@ public final class ExceptionUtils {
   public static String toString(HttpStatusCodeException e) {
     Map<String, Object> errorAttributes = gson.fromJson(e.getResponseBodyAsString(), mapType);
     if (errorAttributes != null) {
-      return MoreObjects.toStringHelper(HttpStatusCodeException.class).omitNullValues()
+      return Objects.toStringHelper(HttpStatusCodeException.class).omitNullValues()
           .add("status", errorAttributes.get("status"))
           .add("message", errorAttributes.get("message"))
           .add("timestamp", errorAttributes.get("timestamp"))

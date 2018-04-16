@@ -1,9 +1,8 @@
 package com.ctrip.framework.apollo.portal.spi;
 
-import com.ctrip.framework.apollo.portal.entity.bo.UserInfo;
-
 import java.util.List;
-import java.util.Set;
+
+import com.ctrip.framework.apollo.portal.entity.bo.UserInfo;
 
 /**
  * @author Jason Song(song_s@ctrip.com)

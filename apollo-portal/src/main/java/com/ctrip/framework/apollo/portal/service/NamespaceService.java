@@ -74,11 +74,8 @@ public class NamespaceService {
   @Transactional
   public void deleteNamespace(String appId, Env env, String clusterName, String namespaceName) {
 
-    //1. check private namespace
+    //1. noneed check private namespace
     AppNamespace appNamespace = appNamespaceService.findByAppIdAndName(appId, namespaceName);
-    if (appNamespace != null && !appNamespace.isPublic()) {
-      throw new BadRequestException("Private namespace can not be deleted");
-    }
 
     //2. check parent namespace has not instances
     if (namespaceHasInstances(appId, env, clusterName, namespaceName)) {
@@ -93,13 +90,17 @@ public class NamespaceService {
     }
 
     //4. check public namespace has not associated namespace
-    if (appNamespace != null && publicAppNamespaceHasAssociatedNamespace(namespaceName, env)) {
+    if (appNamespace != null && appNamespace.isPublic() && publicAppNamespaceHasAssociatedNamespace(namespaceName, env)) {
       throw new BadRequestException("Can not delete public namespace which has associated namespaces");
     }
 
     String operator = userInfoHolder.getUser().getUserId();
-
     namespaceAPI.deleteNamespace(env, appId, clusterName, namespaceName, operator);
+    namespaceAPI.deleteAppNamespace(env, appId, namespaceName, operator);
+    
+    if (appNamespace != null ){
+    	appNamespaceService.deleteById(appNamespace.getId());
+    }
   }
 
   public NamespaceDTO loadNamespaceBaseInfo(String appId, Env env, String clusterName, String namespaceName) {
@@ -141,6 +142,10 @@ public class NamespaceService {
                                                                int size) {
     return namespaceAPI.getPublicAppNamespaceAllNamespaces(env, publicNamespaceName, page, size);
   }
+  
+	public List<NamespaceDTO> getAppNamespaceAllNamespaces(Env env, String publicNamespaceName, int page, int size) {
+		return namespaceAPI.getAppNamespaceAllNamespaces(env, publicNamespaceName, page, size);
+	}
 
   public NamespaceBO loadNamespaceBO(String appId, Env env, String clusterName, String namespaceName) {
     NamespaceDTO namespace = namespaceAPI.loadNamespace(appId, env, clusterName, namespaceName);

@@ -1,12 +1,12 @@
 package com.ctrip.framework.apollo.biz.service;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-
-import com.ctrip.framework.apollo.biz.entity.Instance;
-import com.ctrip.framework.apollo.biz.entity.InstanceConfig;
-import com.ctrip.framework.apollo.biz.repository.InstanceConfigRepository;
-import com.ctrip.framework.apollo.biz.repository.InstanceRepository;
+import java.math.BigInteger;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,13 +16,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigInteger;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.ctrip.framework.apollo.biz.entity.Instance;
+import com.ctrip.framework.apollo.biz.entity.InstanceConfig;
+import com.ctrip.framework.apollo.biz.repository.InstanceConfigRepository;
+import com.ctrip.framework.apollo.biz.repository.InstanceRepository;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 /**
  * @author Jason Song(song_s@ctrip.com)
@@ -145,11 +144,10 @@ public class InstanceService {
    */
   private Date getValidInstanceConfigDate() {
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DATE, -1);
-    cal.add(Calendar.HOUR, -1);
+    cal.add(Calendar.MINUTE, -11);
     return cal.getTime();
   }
-
+  
   @Transactional
   public InstanceConfig createInstanceConfig(InstanceConfig instanceConfig) {
     instanceConfig.setId(0); //protection

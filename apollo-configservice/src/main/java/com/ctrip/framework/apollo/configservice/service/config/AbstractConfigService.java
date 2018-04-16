@@ -1,15 +1,14 @@
 package com.ctrip.framework.apollo.configservice.service.config;
 
+import java.util.Objects;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ctrip.framework.apollo.biz.entity.Release;
 import com.ctrip.framework.apollo.biz.grayReleaseRule.GrayReleaseRulesHolder;
 import com.ctrip.framework.apollo.core.ConfigConsts;
 import com.ctrip.framework.apollo.core.dto.ApolloNotificationMessages;
-
 import com.google.common.base.Strings;
-
-import java.util.Map;
-import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Jason Song(song_s@ctrip.com)

@@ -1,9 +1,9 @@
 package com.ctrip.framework.apollo.portal.util;
 
-import org.apache.commons.lang.time.FastDateFormat;
-
 import java.util.Calendar;
 import java.util.Date;
+
+import org.apache.commons.lang.time.FastDateFormat;
 
 
 public class RelativeDateFormat {
@@ -81,7 +81,7 @@ public class RelativeDateFormat {
   public static Date getDateOffset(int offset) {
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(new Date());
-    calendar.add(calendar.DATE, offset);
+    calendar.add(Calendar.DATE, offset);
 
     return getDayBeginTime(calendar.getTime());
   }

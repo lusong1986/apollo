@@ -1,7 +1,5 @@
 package com.ctrip.framework.apollo.biz.entity;
 
-import com.google.common.base.MoreObjects;
-
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -11,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+
+import com.google.common.base.Objects;
 
 /**
  * @author Jason Song(song_s@ctrip.com)
@@ -136,7 +136,7 @@ public class InstanceConfig {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
+    return Objects.toStringHelper(this)
         .omitNullValues()
         .add("id", id)
         .add("configAppId", configAppId)

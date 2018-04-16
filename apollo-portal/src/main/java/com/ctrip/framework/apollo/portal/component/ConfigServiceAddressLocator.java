@@ -27,15 +27,16 @@ import com.ctrip.framework.apollo.tracer.Tracer;
 import com.google.common.collect.Lists;
 
 @Component
-public class AdminServiceAddressLocator {
+public class ConfigServiceAddressLocator {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ConfigServiceAddressLocator.class);
 
 	private static final long NORMAL_REFRESH_INTERVAL = 5 * 60 * 1000;
 	private static final long OFFLINE_REFRESH_INTERVAL = 10 * 1000;
 	private static final int RETRY_TIMES = 3;
-	private static final String ADMIN_SERVICE_URL_PATH = "/services/admin";
-	private static final Logger logger = LoggerFactory.getLogger(AdminServiceAddressLocator.class);
+	private static final String CONFIG_SERVICE_URL_PATH = "/services/config";
 
-	private ScheduledExecutorService refreshServiceAddressService;
+	private ScheduledExecutorService refreshConfigServiceAddressService;
 	private RestTemplate restTemplate;
 	private List<Env> allEnvs;
 	private Map<Env, List<ServiceDTO>> cache = new ConcurrentHashMap<>();
@@ -54,10 +55,10 @@ public class AdminServiceAddressLocator {
 		// init restTemplate
 		restTemplate = restTemplateFactory.getObject();
 
-		refreshServiceAddressService = Executors.newScheduledThreadPool(1,
-				ApolloThreadFactory.create("ServiceLocator", true));
+		refreshConfigServiceAddressService = Executors.newScheduledThreadPool(1,
+				ApolloThreadFactory.create("ConfigServiceLocator", true));
 
-		refreshServiceAddressService.schedule(new RefreshAdminServerAddressTask(), 1, TimeUnit.MILLISECONDS);
+		refreshConfigServiceAddressService.schedule(new RefreshConfigServerAddressTask(), 100, TimeUnit.MILLISECONDS);
 	}
 
 	public List<ServiceDTO> getServiceList(Env env) {
@@ -65,13 +66,13 @@ public class AdminServiceAddressLocator {
 		if (CollectionUtils.isEmpty(services)) {
 			return Collections.emptyList();
 		}
+
 		List<ServiceDTO> randomConfigServices = Lists.newArrayList(services);
 		Collections.shuffle(randomConfigServices);
 		return randomConfigServices;
 	}
 
-	// maintain admin server address
-	private class RefreshAdminServerAddressTask implements Runnable {
+	private class RefreshConfigServerAddressTask implements Runnable {
 
 		@Override
 		public void run() {
@@ -83,11 +84,11 @@ public class AdminServiceAddressLocator {
 			}
 
 			if (refreshSuccess) {
-				refreshServiceAddressService.schedule(new RefreshAdminServerAddressTask(), NORMAL_REFRESH_INTERVAL,
-						TimeUnit.MILLISECONDS);
+				refreshConfigServiceAddressService.schedule(new RefreshConfigServerAddressTask(),
+						NORMAL_REFRESH_INTERVAL, TimeUnit.MILLISECONDS);
 			} else {
-				refreshServiceAddressService.schedule(new RefreshAdminServerAddressTask(), OFFLINE_REFRESH_INTERVAL,
-						TimeUnit.MILLISECONDS);
+				refreshConfigServiceAddressService.schedule(new RefreshConfigServerAddressTask(),
+						OFFLINE_REFRESH_INTERVAL, TimeUnit.MILLISECONDS);
 			}
 		}
 	}
@@ -95,7 +96,7 @@ public class AdminServiceAddressLocator {
 	private boolean refreshServerAddressCache(Env env) {
 		for (int i = 0; i < RETRY_TIMES; i++) {
 			try {
-				ServiceDTO[] services = getAdminServerAddress(env);
+				ServiceDTO[] services = getConfigServerAddress(env);
 				if (services == null || services.length == 0) {
 					continue;
 				}
@@ -103,19 +104,19 @@ public class AdminServiceAddressLocator {
 				return true;
 			} catch (Throwable e) {
 				logger.error(String.format(
-						"Get admin server address from meta server failed. env: %s, meta server address:%s", env,
+						"Get config server address from meta server failed. env: %s, meta server address:%s", env,
 						MetaDomainConsts.getDomain(env)), e);
 				Tracer.logError(String.format(
-						"Get admin server address from meta server failed. env: %s, meta server address:%s", env,
+						"Get config server address from meta server failed. env: %s, meta server address:%s", env,
 						MetaDomainConsts.getDomain(env)), e);
 			}
 		}
 		return false;
 	}
 
-	private ServiceDTO[] getAdminServerAddress(Env env) {
+	private ServiceDTO[] getConfigServerAddress(Env env) {
 		String domainName = MetaDomainConsts.getDomain(env);
-		String url = domainName + ADMIN_SERVICE_URL_PATH;
+		String url = domainName + CONFIG_SERVICE_URL_PATH;
 		return restTemplate.getForObject(url, ServiceDTO[].class);
 	}
 

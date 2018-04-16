@@ -5,7 +5,9 @@ spring:
     active: ${apollo_profile}
 
 server:
-  port: 8080
+  port: 8070
+  session:
+     timeout: 3600
   
 logging:
   file: /opt/logs/100003173/apollo-portal.log

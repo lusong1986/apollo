@@ -1,11 +1,11 @@
 package com.ctrip.framework.apollo.configservice.service.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ctrip.framework.apollo.biz.entity.Release;
 import com.ctrip.framework.apollo.biz.entity.ReleaseMessage;
 import com.ctrip.framework.apollo.biz.service.ReleaseService;
 import com.ctrip.framework.apollo.core.dto.ApolloNotificationMessages;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * config service with no cache

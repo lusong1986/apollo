@@ -59,11 +59,10 @@ public class AppController {
   @RequestMapping(value = "", method = RequestMethod.GET)
   public List<App> findApps(@RequestParam(value = "appIds", required = false) String appIds) {
     if (StringUtils.isEmpty(appIds)) {
-      return appService.findAll();
+      return appService.findAllByUserId();
     } else {
       return appService.findByAppIds(Sets.newHashSet(appIds.split(",")));
     }
-
   }
 
   @RequestMapping(value = "/by-owner", method = RequestMethod.GET)
@@ -102,6 +101,22 @@ public class AppController {
 
     publisher.publishEvent(new AppInfoChangedEvent(updatedApp));
   }
+  
+
+	@PreAuthorize(value = "@permissionValidator.isSuperAdmin()")
+	@RequestMapping(value = "/{appId:.+}", method = RequestMethod.DELETE)
+	public void delete(@PathVariable String appId) {
+		if (StringUtils.isEmpty(appId)) {
+			throw new BadRequestException("The App Id is empty.");
+		}
+
+		List<App> apps = appService.findByAppIds(Sets.newHashSet(appId));
+		if (CollectionUtils.isEmpty(apps)) {
+			throw new BadRequestException("The App Id is not exsit. appId:"+appId);
+		}
+
+		appService.deleteApp(apps.get(0));
+	}
 
   @RequestMapping(value = "/{appId}/navtree", method = RequestMethod.GET)
   public MultiResponseEntity<EnvClusterInfo> nav(@PathVariable String appId) {

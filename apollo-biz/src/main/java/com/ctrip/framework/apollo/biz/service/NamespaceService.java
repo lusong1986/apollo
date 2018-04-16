@@ -1,7 +1,20 @@
 package com.ctrip.framework.apollo.biz.service;
 
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import com.ctrip.framework.apollo.biz.entity.Audit;
 import com.ctrip.framework.apollo.biz.entity.Cluster;
@@ -19,21 +32,9 @@ import com.ctrip.framework.apollo.common.exception.BadRequestException;
 import com.ctrip.framework.apollo.common.exception.ServiceException;
 import com.ctrip.framework.apollo.common.utils.BeanUtils;
 import com.ctrip.framework.apollo.core.ConfigConsts;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 
 @Service
 public class NamespaceService {
@@ -138,7 +139,28 @@ public class NamespaceService {
 
     return filterChildNamespace(namespaces);
   }
+  
+	public List<Namespace> findAppNamespaceAllNamespaces(String namespaceName, Pageable page) {
+		AppNamespace publicAppNamespace = appNamespaceService.findPublicNamespaceByName(namespaceName);
+		if (publicAppNamespace != null) {
+			List<Namespace> namespaces = namespaceRepository.findByNamespaceName(namespaceName, page);
+			return filterChildNamespace(namespaces);
+		}
 
+		List<AppNamespace> privateAppNameSpaces = appNamespaceService.findPrivateNamespaceByName(namespaceName);
+		if (privateAppNameSpaces != null && privateAppNameSpaces.size() > 0) {
+			ArrayList<Namespace> list = Lists.newArrayList();
+			for (AppNamespace privateAppNamespace : privateAppNameSpaces) {
+				List<Namespace> namespaces = namespaceRepository.findByNamespaceName(privateAppNamespace.getName(),
+						page);
+				list.addAll(filterChildNamespace(namespaces));
+			}
+			return list;
+		}
+
+		throw new BadRequestException(String.format("appNamespace not exists. NamespaceName = %s", namespaceName));
+	}
+  
   private List<Namespace> filterChildNamespace(List<Namespace> namespaces) {
     List<Namespace> result = new LinkedList<>();
 

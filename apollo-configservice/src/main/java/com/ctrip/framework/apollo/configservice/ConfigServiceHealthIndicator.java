@@ -1,12 +1,12 @@
 package com.ctrip.framework.apollo.configservice;
 
-import com.ctrip.framework.apollo.biz.service.AppService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+
+import com.ctrip.framework.apollo.biz.service.AppService;
 
 @Component
 public class ConfigServiceHealthIndicator implements HealthIndicator {

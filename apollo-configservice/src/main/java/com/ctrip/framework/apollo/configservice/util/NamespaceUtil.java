@@ -1,10 +1,10 @@
 package com.ctrip.framework.apollo.configservice.util;
 
-import com.ctrip.framework.apollo.common.entity.AppNamespace;
-import com.ctrip.framework.apollo.configservice.service.AppNamespaceServiceWithCache;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.ctrip.framework.apollo.common.entity.AppNamespace;
+import com.ctrip.framework.apollo.configservice.service.AppNamespaceServiceWithCache;
 
 /**
  * @author Jason Song(song_s@ctrip.com)

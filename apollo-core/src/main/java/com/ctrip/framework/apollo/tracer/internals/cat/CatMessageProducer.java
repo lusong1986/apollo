@@ -1,9 +1,9 @@
 package com.ctrip.framework.apollo.tracer.internals.cat;
 
+import java.lang.reflect.Method;
+
 import com.ctrip.framework.apollo.tracer.spi.MessageProducer;
 import com.ctrip.framework.apollo.tracer.spi.Transaction;
-
-import java.lang.reflect.Method;
 
 /**
  * @author Jason Song(song_s@ctrip.com)
